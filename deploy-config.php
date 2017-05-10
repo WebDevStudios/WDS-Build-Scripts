@@ -15,11 +15,11 @@
 /**
  * Protect the script from unauthorized access by using a secret access token.
  * If it's not present in the access URL as a GET variable named `sat`
- * e.g. deploy.php?sat=Bett...s the script is not going to deploy.
+ * e.g. deploy.php?sat=project-client-name the script is not going to deploy.
  *
  * @var string
  */
-define('SECRET_ACCESS_TOKEN', 'project-integrity-house');
+define('SECRET_ACCESS_TOKEN', 'project-client-name');
 
 /**
  * The address of the remote Git repository that contains the code that's being
@@ -28,7 +28,7 @@ define('SECRET_ACCESS_TOKEN', 'project-integrity-house');
  *
  * @var string
  */
-define('REMOTE_REPOSITORY', 'git@github.com:WebDevStudios/project-integrity-house.git');
+define('REMOTE_REPOSITORY', 'git@github.com:WebDevStudios/project-client-name.git');
 
 /**
  * The branch that's being deployed.
@@ -42,7 +42,7 @@ define('BRANCH', 'master');
  * The location that the code is going to be deployed to.
  * Don't forget the trailing slash!
  *
- * Example: ~/apps/clientname/public/
+ * Example: wp-content/
  *
  * @var string Full path including the trailing slash
  */
@@ -152,7 +152,7 @@ define('BUILD_APP', true);
 /**
  * The locations of the theme for building.
  */
-define('BUILD_DIR', 'themes/integrityhouse');
+define('BUILD_DIR', 'themes/client-theme');
 
 /**
  * OPTIONAL
@@ -161,4 +161,4 @@ define('BUILD_DIR', 'themes/integrityhouse');
  * @var string A single email address, or comma separated list of email addresses
  *      e.g. 'someone@example.com' or 'someone@example.com, someone-else@example.com, ...'
  */
-define('EMAIL_ON_ERROR', 'greg@webdevstudios.com');
+define('EMAIL_ON_ERROR', 'contact@webdevstudios.com');
