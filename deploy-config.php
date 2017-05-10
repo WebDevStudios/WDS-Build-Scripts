@@ -42,11 +42,11 @@ define( 'BRANCH', 'master' );
  * The location that the code is going to be deployed to.
  * Don't forget the trailing slash!
  *
- * Example: wp-content/
+ * Example: /srv/users/username/apps/appname/public/wp-content/
  *
  * @var string Full path including the trailing slash
  */
-define( 'TARGET_DIR', 'wp-content/' );
+define( 'TARGET_DIR', '/srv/users/username/apps/appname/public/wp-content/' );
 
 /**
  * Whether to delete the files that are not in the repository but are on the
