@@ -19,7 +19,7 @@
  *
  * @var string
  */
-define('SECRET_ACCESS_TOKEN', 'project-client-name');
+define( 'SECRET_ACCESS_TOKEN', 'project-client-name' );
 
 /**
  * The address of the remote Git repository that contains the code that's being
@@ -28,7 +28,7 @@ define('SECRET_ACCESS_TOKEN', 'project-client-name');
  *
  * @var string
  */
-define('REMOTE_REPOSITORY', 'git@github.com:WebDevStudios/project-client-name.git');
+define( 'REMOTE_REPOSITORY', 'git@github.com:WebDevStudios/project-client-name.git' );
 
 /**
  * The branch that's being deployed.
@@ -36,7 +36,7 @@ define('REMOTE_REPOSITORY', 'git@github.com:WebDevStudios/project-client-name.gi
  *
  * @var string
  */
-define('BRANCH', 'master');
+define( 'BRANCH', 'master' );
 
 /**
  * The location that the code is going to be deployed to.
@@ -46,7 +46,7 @@ define('BRANCH', 'master');
  *
  * @var string Full path including the trailing slash
  */
-define('TARGET_DIR', 'wp-content/');
+define( 'TARGET_DIR', 'wp-content/' );
 
 /**
  * Whether to delete the files that are not in the repository but are on the
@@ -59,7 +59,7 @@ define('TARGET_DIR', 'wp-content/');
  *
  * @var boolean
  */
-define('DELETE_FILES', false);
+define( 'DELETE_FILES', false );
 
 /**
  * The directories and files that are to be excluded when updating the code.
@@ -82,28 +82,28 @@ define('EXCLUDE', serialize( array(
  *
  * @var string Full path including the trailing slash
  */
-define('TMP_DIR', '/tmp/spgd-'.md5(REMOTE_REPOSITORY).'/');
+define( 'TMP_DIR', '/tmp/spgd-' . md5( REMOTE_REPOSITORY ) . '/' );
 
 /**
  * Whether to remove the TMP_DIR after the deployment.
  * It's useful NOT to clean up in order to only fetch changes on the next
  * deployment.
  */
-define('CLEAN_UP', true);
+define( 'CLEAN_UP', true );
 
 /**
  * Output the version of the deployed code.
  *
  * @var string Full path to the file name
  */
-define('VERSION_FILE', TMP_DIR.'VERSION');
+define( 'VERSION_FILE', TMP_DIR . 'VERSION' );
 
 /**
  * Time limit for each command.
  *
  * @var int Time in seconds
  */
-define('TIME_LIMIT', 90);
+define( 'TIME_LIMIT', 90 );
 
 /**
  * OPTIONAL
@@ -111,7 +111,7 @@ define('TIME_LIMIT', 90);
  *
  * @var string Full backup directory path e.g. `/tmp/`
  */
-define('BACKUP_DIR', false);
+define( 'BACKUP_DIR', false );
 
 /**
  * OPTIONAL
@@ -122,7 +122,7 @@ define('BACKUP_DIR', false);
  * @var boolean Whether to use composer or not
  * @link http://getcomposer.org/
  */
-define('USE_COMPOSER', false);
+define( 'USE_COMPOSER', false );
 
 /**
  * OPTIONAL
@@ -131,7 +131,7 @@ define('USE_COMPOSER', false);
  * @var string Composer options
  * @link http://getcomposer.org/doc/03-cli.md#install
  */
-define('COMPOSER_OPTIONS', '--no-dev');
+define( 'COMPOSER_OPTIONS', '--no-dev' );
 
 /**
  * OPTIONAL
@@ -141,18 +141,18 @@ define('COMPOSER_OPTIONS', '--no-dev');
  * @var string Path to the COMPOSER_HOME e.g. `/tmp/composer`
  * @link https://getcomposer.org/doc/03-cli.md#composer-home
  */
-define('COMPOSER_HOME', false);
+define( 'COMPOSER_HOME', false );
 
 /**
  * OPTIONAL
  * Run build.sh?
  */
-define('BUILD_APP', true);
+define( 'BUILD_APP', true );
 
 /**
  * The locations of the theme for building.
  */
-define('BUILD_DIR', 'themes/client-theme');
+define( 'BUILD_DIR', 'themes/client-theme' );
 
 /**
  * OPTIONAL
@@ -161,4 +161,4 @@ define('BUILD_DIR', 'themes/client-theme');
  * @var string A single email address, or comma separated list of email addresses
  *      e.g. 'someone@example.com' or 'someone@example.com, someone-else@example.com, ...'
  */
-define('EMAIL_ON_ERROR', 'contact@webdevstudios.com');
+define( 'EMAIL_ON_ERROR', 'contact@webdevstudios.com' );
