@@ -80,6 +80,8 @@ define('EXCLUDE', serialize( array(
  * repository with the correct remote origin and only fetches changes instead of
  * cloning the entire thing.
  *
+ * Note: This directory will be placed at the server root (not the user's /tmp)!
+ *
  * @var string Full path including the trailing slash
  */
 define( 'TMP_DIR', '/tmp/spgd-' . md5( REMOTE_REPOSITORY ) . '/' );
