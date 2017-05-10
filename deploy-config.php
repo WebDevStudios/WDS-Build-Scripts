@@ -90,8 +90,11 @@ define( 'TMP_DIR', '/tmp/spgd-' . md5( REMOTE_REPOSITORY ) . '/' );
  * Whether to remove the TMP_DIR after the deployment.
  * It's useful NOT to clean up in order to only fetch changes on the next
  * deployment.
+ *
+ * Note: By not cleaning up, deployments + builds take about ~5 seconds
+ * since there is no need to re-run yarn install.
  */
-define( 'CLEAN_UP', true );
+define( 'CLEAN_UP', false );
 
 /**
  * Output the version of the deployed code.
