@@ -302,7 +302,7 @@ if ( ! is_dir( TMP_DIR ) ) {
 
 // Update the submodules
 $commands[] = sprintf(
-	'git submodule update --init --recursive'
+	'git submodule foreach git checkout master && git submodule foreach --recursive git pull origin master'
 );
 
 // Describe the deployed version
