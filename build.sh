@@ -22,7 +22,7 @@ if [ ! -f package.json ];
     echo "Installing node modules..."
     if [ ! -d "node_modules" ];
       then
-       yarn install
+       npm install
       else
        echo "node modules already installed"
     fi
