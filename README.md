@@ -34,6 +34,7 @@ For example:
 - Open `build.sh` and configure to meet your needs
 - Save and commit these files to your repository
 - In your Github or Bitbucket project, configure a webhook to point at `https://yourproject.com/wp-content/deploy.php?sat=your-secret-access-token`
+- There have been instances where the server user doesn't always have permission to run the script. If that happens, just add that user to the list of sudoers - `adduser <username> sudo`
 
 When a commit is pushed to `master` (or whatever branch you configured) this will trigger the webhook - which will ping this URL and kick off the deployment + build.
 
