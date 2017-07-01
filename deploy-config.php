@@ -28,7 +28,7 @@ define( 'SECRET_ACCESS_TOKEN', 'project-client-name' );
  *
  * @var string
  */
-define( 'REMOTE_REPOSITORY', 'git@github.com:WebDevStudios/project-client-name.git' );
+define( 'REMOTE_REPOSITORY', 'git@github.com:JayWood/DeployTests.git' );
 
 /**
  * The branch that's being deployed.
@@ -46,7 +46,7 @@ define( 'BRANCH', 'master' );
  *
  * @var string Full path including the trailing slash
  */
-define( 'TARGET_DIR', '/srv/users/username/apps/appname/public/wp-content/' );
+define( 'TARGET_DIR', '/home/plugish/html/jays.link/deploytest' );
 
 /**
  * Whether to delete the files that are not in the repository but are on the
