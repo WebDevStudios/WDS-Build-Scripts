@@ -46,7 +46,7 @@ define( 'BRANCH', 'master' );
  *
  * @var string Full path including the trailing slash
  */
-define( 'TARGET_DIR', '/home/plugish/html/jays.link/deploytest' );
+define( 'TARGET_DIR', '/home/jay/html/deploytest-stuffs' );
 
 /**
  * Whether to delete the files that are not in the repository but are on the
@@ -72,6 +72,7 @@ define( 'DELETE_FILES', false );
 define('EXCLUDE', serialize( array(
 	'.git',
 	'node_modules',
+	'deploy',
 )));
 
 /**
@@ -152,12 +153,13 @@ define( 'COMPOSER_HOME', false );
  * OPTIONAL
  * Run build.sh?
  */
-define( 'BUILD_APP', true );
+define( 'BUILD_APP', false );
 
 /**
  * The locations of the theme for building.
  */
-define( 'BUILD_DIR', 'themes/client-theme' );
+// define( 'BUILD_DIR', 'themes/client-theme' );
+define( 'BUILD_DIR', TMP_DIR .'wp-content/themes/client-theme' ); // Use tmp dir, so we can build there.
 
 /**
  * OPTIONAL
@@ -167,3 +169,11 @@ define( 'BUILD_DIR', 'themes/client-theme' );
  *      e.g. 'someone@example.com' or 'someone@example.com, someone-else@example.com, ...'
  */
 define( 'EMAIL_ON_ERROR', 'contact@webdevstudios.com' );
+
+define( 'ENVIRONMENTS', json_encode( array(
+	'production' => array(
+		'repo' => 'git@bitbucket.org:jaywood/deploytest.git',
+		'remote_branch' => 'master',
+		'local_branch' => 'master',
+	),
+) ) );

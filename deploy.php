@@ -271,6 +271,65 @@ Deploying <?php echo REMOTE_REPOSITORY; ?> <?php echo BRANCH . "\n"; ?>
 to        <?php echo TARGET_DIR; ?> ...
 
 <?php
+
+/**
+ * Grabs the branch this was pushed to.
+ *
+ * GitHub branches are prefixed with 'refs/heads/' so it's
+ * simple enough to just replace that and return whats left.
+ *
+ * @return string
+ *
+ * @author JayWood
+ * @since  NEXT
+ */
+function get_branch_pushed() {
+	if ( ! isset( $_REQUEST['payload'] ) ) {
+		return '';
+	}
+
+	$payload = $_REQUEST['payload'];
+	$decoded = json_decode( $payload );
+	if ( ! $decoded || ! $decoded->refs ) {
+		return '';
+	}
+
+	return str_replace( 'refs/heads/', '', $decoded->refs );
+}
+
+/**
+ * Gets and parses a list of environments from the constant.
+ *
+ * @return array an array of environments.
+ *
+ * @author JayWood
+ * @since  NEXT
+ */
+function get_environments() {
+	static $environments;
+
+	if ( null !== $environments ) {
+		return $environments;
+	}
+
+	if ( ! defined( 'ENVIRONMENTS' ) || empty( ENVIRONMENTS ) ) {
+		$environments = array();
+		return $environments;
+	}
+
+	$environments = json_decode( ENVIRONMENTS, true );
+	$out = [];
+
+	foreach( $environments as $name => $env ) {
+		if ( empty( $env['remote_branch'] ) || empty( $env['repo'] ) || empty( $env['local_branch'] ) ) {
+			continue;
+		}
+		$out[ $name ] = $env;
+	}
+
+	return $out;
+}
+
 // The commands
 $commands = array();
 
@@ -279,11 +338,25 @@ $commands = array();
 if ( ! is_dir( TMP_DIR ) ) {
 	// Clone the repository into the TMP_DIR
 	$commands[] = sprintf(
-		'git clone --depth=1 --branch %s %s %s'
+	// Some repos do not allow shallow clones, so we have to clone the entire repo :( - may just be a bitbucket thing.
+	// 'git clone --depth=1 --branch %s %s %s'
+		'git clone --branch %s %s %s'
 		, BRANCH
 		, REMOTE_REPOSITORY
 		, TMP_DIR
 	);
+
+	if ( ! empty( get_environments() ) ) {
+		foreach( get_environments() as $remote_name => $env ) {
+			$commands[] = sprintf(
+					'git --git-dir="%1$s.git" --work-tree="%1$s" remote add %2$s %3$s',
+					TMP_DIR,
+					$remote_name,
+					$env['repo']
+			);
+		}
+	}
+
 } else {
 	// TMP_DIR exists and hopefully already contains the correct remote origin
 	// so we'll fetch the changes and reset the contents.
@@ -299,6 +372,7 @@ if ( ! is_dir( TMP_DIR ) ) {
 		, TMP_DIR
 	);
 }
+
 
 // Update the submodules
 $commands[] = sprintf(
@@ -343,10 +417,47 @@ if ( defined( 'USE_COMPOSER' ) && USE_COMPOSER === true ) {
 
 // Invoke build script...
 if ( defined( 'BUILD_APP' ) && BUILD_APP === true ) {
+	// Make sure we supply absolute path to shell script.
+	$dir = dirname( __FILE__ );
 	$commands[] = sprintf(
-		'sh build.sh %s'
+		"sh {$dir}/build.sh %s"
 		, BUILD_DIR
 	);
+}
+
+// Handle environmental pushes after the build.
+if ( ! empty( get_environments() ) ) {
+	foreach( get_environments() as $remote_name => $env ) {
+		$env_branch = $env['local_branch'];
+		$remote_branch = $env['remote_branch'];
+
+		// Uncomment the following lines if you want to restrict deploys
+		// while listening to the specific branch.
+		// if ( get_branch_pushed() !== $env_branch ) {
+		// 	continue;
+		// }
+
+		// Add all files, including VERSION ( for obvious reasons )
+		$commands[] = sprintf(
+			'git --git-dir="%1$s.git" --work-tree="%1$s" add -A .',
+			TMP_DIR
+		);
+
+		// Commit build changes, set message to something simple.
+		$commands[] = sprintf(
+			'git --git-dir="%1$s.git" --work-tree="%1$s" commit -m "%2$s"',
+			TMP_DIR,
+			"BUILD origin/$env_branch for $remote_name/$remote_branch"
+		);
+
+		// Push build changes to remote environment, using force-push, I know...
+		$commands[] = sprintf(
+			'git --git-dir="%s.git" --work-tree="%s" push %2$s +%3$s',
+			TMP_DIR,
+			$remote_name,
+			$remote_branch
+		);
+	}
 }
 
 // ==================================================[ Deployment ]===
