@@ -14,6 +14,7 @@
 function get_branch_pushed() {
 
 	$payload = get_payload();
+
 	if ( user_is_beanstalk() ) {
 		return $payload->branch;
 	} elseif ( user_is_github() ) {
@@ -76,7 +77,7 @@ function get_environments() {
 	$out = [];
 
 	foreach( $environments as $name => $env ) {
-		if ( empty( $env['remote_branch'] ) || empty( $env['repo'] ) || empty( $env['local_branch'] ) ) {
+		if ( empty( $env['remote_branch'] ) || empty( $env['repo'] ) || empty( $env['listen_branch'] ) ) {
 			continue;
 		}
 		$out[ $name ] = $env;
@@ -119,4 +120,37 @@ function user_is_github() {
 	}
 
 	return 0 === strpos( $_SERVER['HTTP_USER_AGENT'], 'GitHub-Hookshot/' );
+}
+
+/**
+ * Helper that validates a branch call.
+ *
+ * Checks the constants and the environments registered, if the branches
+ * do not match, the script will return false.
+ *
+ * @return bool
+ *
+ * @author JayWood
+ * @since  NEXT
+ */
+function is_valid_branch() {
+	$branch_pushed = get_branch_pushed();
+	if ( empty( $branch_pushed ) ) {
+		return false;
+	}
+
+	$env = get_environments();
+	if ( ! empty( $env ) ) {
+		foreach( $env as $environment_name => $data ) {
+			if ( $data['local_branch'] === $branch_pushed ) {
+				return true;
+			}
+		}
+	}
+
+	if ( defined( 'BRANCH' ) && ! empty( BRANCH ) ) {
+		return BRANCH === $branch_pushed;
+	}
+
+	return false;
 }

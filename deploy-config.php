@@ -159,7 +159,7 @@ define( 'BUILD_APP', false );
  * The locations of the theme for building.
  */
 // define( 'BUILD_DIR', 'themes/client-theme' );
-define( 'BUILD_DIR', TMP_DIR .'wp-content/themes/client-theme' ); // Use tmp dir, so we can build there.
+define( 'BUILD_DIR', TMP_DIR .'themes/loveisrespect' ); // Use tmp dir, so we can build there.
 
 /**
  * OPTIONAL
@@ -174,6 +174,6 @@ define( 'ENVIRONMENTS', json_encode( array(
 	'production' => array(
 		'repo' => 'git@bitbucket.org:jaywood/anotherrepo.git',
 		'remote_branch' => 'master',
-		'local_branch' => 'master',
+		'listen_branch' => 'master',
 	),
 ) ) );
