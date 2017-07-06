@@ -7,9 +7,8 @@
  * @version 1.3.1
  * @link    https://github.com/markomarkovic/simple-php-git-deploy/
  */
-
+// die();
 // =========================================[ Configuration start ]===
-
 /**
  * It's preferable to configure the script using `deploy-config.php` file.
  *
@@ -205,6 +204,12 @@ if ( ! defined( 'EMAIL_ON_ERROR' ) ) { define( 'EMAIL_ON_ERROR', false );
 if ( ! isset( $_GET['sat'] ) || $_GET['sat'] !== SECRET_ACCESS_TOKEN || SECRET_ACCESS_TOKEN === 'BetterChangeMeNowOrSufferTheConsequences' ) {
 	header( $_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden', true, 403 );
 }
+
+// Validates the branch name that was pushed to, if we should listen for it or not
+if ( ! is_valid_branch() ) {
+	return;
+}
+
 ob_start();
 ?>
 <!DOCTYPE html>
@@ -270,7 +275,7 @@ Environment OK.
 
 Using configuration defined in <?php echo CONFIG_FILE . "\n"; ?>
 
-Deploying <?php echo REMOTE_REPOSITORY; ?> <?php echo BRANCH . "\n"; ?>
+Deploying <?php echo REMOTE_REPOSITORY; ?> <?php echo LAB_BRANCH . "\n"; ?>
 to        <?php echo TARGET_DIR; ?> ...
 
 <?php
@@ -285,7 +290,7 @@ if ( ! is_dir( TMP_DIR ) ) {
 	// Some repos do not allow shallow clones, so we have to clone the entire repo :( - may just be a bitbucket thing.
 	// 'git clone --depth=1 --branch %s %s %s'
 		'git clone --branch %s %s %s'
-		, BRANCH
+		, LAB_BRANCH
 		, REMOTE_REPOSITORY
 		, TMP_DIR
 	);
@@ -304,75 +309,14 @@ if ( ! is_dir( TMP_DIR ) ) {
 } else {
 	// TMP_DIR exists and hopefully already contains the correct remote origin
 	// so we'll fetch the changes and reset the contents.
-	$commands[] = sprintf(
-		'git --git-dir="%s.git" --work-tree="%s" fetch --tags origin %s'
-		, TMP_DIR
-		, TMP_DIR
-		, BRANCH
-	);
-	$commands[] = sprintf(
-		'git --git-dir="%s.git" --work-tree="%s" reset --hard FETCH_HEAD'
-		, TMP_DIR
-		, TMP_DIR
-	);
+	$commands = reset_branch( $commands );
 }
 
-
-// Update the submodules
-$commands[] = sprintf(
-	'git submodule foreach git checkout master && git submodule foreach --recursive git pull origin master'
-);
-
-// Describe the deployed version
-if ( defined( 'VERSION_FILE' ) && VERSION_FILE !== '' ) {
-	$commands[] = sprintf(
-		'git --git-dir="%s.git" --work-tree="%s" describe --always > %s'
-		, TMP_DIR
-		, TMP_DIR
-		, VERSION_FILE
-	);
-}
-
-// Backup the TARGET_DIR
-// without the BACKUP_DIR for the case when it's inside the TARGET_DIR
-if ( defined( 'BACKUP_DIR' ) && BACKUP_DIR !== false ) {
-	$commands[] = sprintf(
-		"tar --exclude='%s*' -czf %s/%s-%s-%s.tar.gz %s*"
-		, BACKUP_DIR
-		, BACKUP_DIR
-		, basename( TARGET_DIR )
-		, md5( TARGET_DIR )
-		, date( 'YmdHis' )
-		, TARGET_DIR // We're backing up this directory into BACKUP_DIR
-	);
-}
-
-// Invoke composer
-if ( defined( 'USE_COMPOSER' ) && USE_COMPOSER === true ) {
-	$commands[] = sprintf(
-		'composer --no-ansi --no-interaction --no-progress --working-dir=%s install %s'
-		, TMP_DIR
-		, (defined( 'COMPOSER_OPTIONS' )) ? COMPOSER_OPTIONS : ''
-	);
-	if ( defined( 'COMPOSER_HOME' ) && is_dir( COMPOSER_HOME ) ) {
-		putenv( 'COMPOSER_HOME=' . COMPOSER_HOME );
-	}
-}
-
-// Invoke build script...
-if ( defined( 'BUILD_APP' ) && BUILD_APP === true ) {
-	// Make sure we supply absolute path to shell script.
-	$dir = dirname( __FILE__ );
-	$commands[] = sprintf(
-		"sh {$dir}/build.sh %s"
-		, BUILD_DIR
-	);
-}
 
 // Handle environmental pushes after the build.
 if ( ! empty( get_environments() ) ) {
 	foreach( get_environments() as $remote_name => $env ) {
-		$env_branch = $env['local_branch'];
+		$env_branch = $env['listen_branch'];
 		$remote_branch = $env['remote_branch'];
 
 		// Uncomment the following lines if you want to restrict deploys
@@ -380,6 +324,18 @@ if ( ! empty( get_environments() ) ) {
 		if ( get_branch_pushed() !== $env_branch ) {
 			continue;
 		}
+
+		$commands[] = sprintf(
+			'git --git-dir="%1$s.git" --work-tree="%1$s" checkout %2$s',
+			TMP_DIR,
+			$env_branch
+		);
+
+		// You must reset the branch to match the origin.
+		$commands = reset_branch( $commands, $env_branch, $remote_name );
+
+		// Run composer and all that stuffs
+		$commands = build_app( $commands );
 
 		// Add all files, including VERSION ( for obvious reasons )
 		$commands[] = sprintf(
@@ -402,23 +358,27 @@ if ( ! empty( get_environments() ) ) {
 			$remote_branch
 		);
 	}
+} else {
+	$commands = build_app( $commands );
 }
 
 // ==================================================[ Deployment ]===
 
+if ( LAB_BRANCH === get_branch_pushed() ) {
 // Compile exclude parameters
-$exclude = '';
-foreach ( unserialize( EXCLUDE ) as $exc ) {
-	$exclude .= ' --exclude=' . $exc;
-}
+	$exclude = '';
+	foreach ( unserialize( EXCLUDE ) as $exc ) {
+		$exclude .= ' --exclude=' . $exc;
+	}
 // Deployment command
-$commands[] = sprintf(
-	'rsync -rltgoDzvO %s %s %s %s'
-	, TMP_DIR
-	, TARGET_DIR
-	, (DELETE_FILES) ? '--delete-after' : ''
-	, $exclude
-);
+	$commands[] = sprintf(
+		'rsync -rltgoDzvO %s %s %s %s'
+		, TMP_DIR
+		, TARGET_DIR
+		, ( DELETE_FILES ) ? '--delete-after' : ''
+		, $exclude
+	);
+}
 
 // =======================================[ Post-Deployment steps ]===
 
@@ -432,7 +392,10 @@ if ( CLEAN_UP ) {
 
 // =======================================[ Run the command steps ]===
 $output = '';
+error_log( __FILE__ . '::' . __LINE__ );
 foreach ( $commands as $command ) {
+	// continue;
+
 	set_time_limit( TIME_LIMIT ); // Reset the time limit for each command
 	if ( file_exists( TMP_DIR ) && is_dir( TMP_DIR ) ) {
 		chdir( TMP_DIR ); // Ensure that we're in the right directory
@@ -448,6 +411,8 @@ foreach ( $commands as $command ) {
 		, htmlentities( trim( implode( "\n", $tmp ) ) )
 	);
 	$output .= ob_get_contents();
+	error_log( "Return code: " . $return_code );
+	error_log( "Output: " . implode( "\n", $tmp ) );
 	ob_flush(); // Try to output everything as it happens
 
 	// Error handling and cleanup

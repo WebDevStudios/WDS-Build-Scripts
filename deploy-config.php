@@ -28,7 +28,7 @@ define( 'SECRET_ACCESS_TOKEN', 'project-client-name' );
  *
  * @var string
  */
-define( 'REMOTE_REPOSITORY', 'git@github.com:JayWood/DeployTests.git' );
+define( 'REMOTE_REPOSITORY', '' );
 
 /**
  * The branch that's being deployed.
@@ -36,7 +36,7 @@ define( 'REMOTE_REPOSITORY', 'git@github.com:JayWood/DeployTests.git' );
  *
  * @var string
  */
-define( 'BRANCH', 'master' );
+define( 'LAB_BRANCH', 'master' );
 
 /**
  * The location that the code is going to be deployed to.
@@ -46,7 +46,7 @@ define( 'BRANCH', 'master' );
  *
  * @var string Full path including the trailing slash
  */
-define( 'TARGET_DIR', '/home/jay/html/deploytest-stuffs' );
+define( 'TARGET_DIR', '/home/jay/html/dd2' );
 
 /**
  * Whether to delete the files that are not in the repository but are on the
@@ -153,7 +153,7 @@ define( 'COMPOSER_HOME', false );
  * OPTIONAL
  * Run build.sh?
  */
-define( 'BUILD_APP', false );
+define( 'BUILD_APP', true );
 
 /**
  * The locations of the theme for building.
@@ -172,8 +172,8 @@ define( 'EMAIL_ON_ERROR', 'contact@webdevstudios.com' );
 
 define( 'ENVIRONMENTS', json_encode( array(
 	'production' => array(
-		'repo' => 'git@bitbucket.org:jaywood/anotherrepo.git',
+		'repo' => 'git@bitbucket.org:jaywood/anotherrepo.git', // WP Engine repo/production
 		'remote_branch' => 'master',
-		'listen_branch' => 'master',
+		'listen_branch' => 'deploy-tests', // Beanstalk repo
 	),
 ) ) );

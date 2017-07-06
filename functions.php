@@ -134,6 +134,10 @@ function user_is_github() {
  * @since  NEXT
  */
 function is_valid_branch() {
+
+	// DEBUGGING
+	// return true;
+
 	$branch_pushed = get_branch_pushed();
 	if ( empty( $branch_pushed ) ) {
 		return false;
@@ -142,15 +146,109 @@ function is_valid_branch() {
 	$env = get_environments();
 	if ( ! empty( $env ) ) {
 		foreach( $env as $environment_name => $data ) {
-			if ( $data['local_branch'] === $branch_pushed ) {
+			if ( $data['listen_branch'] === $branch_pushed ) {
 				return true;
 			}
 		}
 	}
 
-	if ( defined( 'BRANCH' ) && ! empty( BRANCH ) ) {
-		return BRANCH === $branch_pushed;
+	if ( defined( 'BRANCH' ) && ! empty( LAB_BRANCH ) ) {
+		return LAB_BRANCH === $branch_pushed;
 	}
 
 	return false;
+}
+
+/**
+ *
+ *
+ * @param $commands
+ *
+ * @return array
+ *
+ * @author JayWood
+ * @since  NEXT
+ */
+function reset_branch( $commands, $branch = '', $environment = 'origin' ) {
+
+	$branch = empty( $branch ) ? LAB_BRANCH : $branch;
+
+	$commands[] = sprintf(
+		'git --git-dir="%1$s.git" --work-tree="%1$s" fetch --tags %2$s %3$s'
+		, TMP_DIR
+		, $environment
+		, $branch
+	);
+	$commands[] = sprintf(
+		'git --git-dir="%1$s.git" --work-tree="%1$s" reset --hard FETCH_HEAD'
+		, TMP_DIR
+	);
+
+	return $commands;
+}
+
+/**
+ *
+ *
+ * @param $commands
+ *
+ * @return array
+ *
+ * @author JayWood
+ * @since  NEXT
+ */
+function build_app( $commands ) {
+// Update the submodules
+	// TODO come back to this, it's just broken :D
+	// $commands[] = sprintf(
+	// 	'git submodule foreach git checkout master && git submodule foreach --recursive git pull origin master'
+	// );
+
+// Describe the deployed version
+	if ( defined( 'VERSION_FILE' ) && VERSION_FILE !== '' ) {
+		$commands[] = sprintf(
+			'git --git-dir="%s.git" --work-tree="%s" describe --always > %s'
+			, TMP_DIR
+			, TMP_DIR
+			, VERSION_FILE
+		);
+	}
+
+// Backup the TARGET_DIR
+// without the BACKUP_DIR for the case when it's inside the TARGET_DIR
+	if ( defined( 'BACKUP_DIR' ) && BACKUP_DIR !== false ) {
+		$commands[] = sprintf(
+			"tar --exclude='%s*' -czf %s/%s-%s-%s.tar.gz %s*"
+			, BACKUP_DIR
+			, BACKUP_DIR
+			, basename( TARGET_DIR )
+			, md5( TARGET_DIR )
+			, date( 'YmdHis' )
+			, TARGET_DIR // We're backing up this directory into BACKUP_DIR
+		);
+	}
+
+// Invoke composer
+	if ( defined( 'USE_COMPOSER' ) && USE_COMPOSER === true ) {
+		$commands[] = sprintf(
+			'composer --no-ansi --no-interaction --no-progress --working-dir=%s install %s'
+			, TMP_DIR
+			, ( defined( 'COMPOSER_OPTIONS' ) ) ? COMPOSER_OPTIONS : ''
+		);
+		if ( defined( 'COMPOSER_HOME' ) && is_dir( COMPOSER_HOME ) ) {
+			putenv( 'COMPOSER_HOME=' . COMPOSER_HOME );
+		}
+	}
+
+// Invoke build script...
+	if ( defined( 'BUILD_APP' ) && BUILD_APP === true ) {
+		// Make sure we supply absolute path to shell script.
+		$dir        = dirname( __FILE__ );
+		$commands[] = sprintf(
+			"sh {$dir}/build.sh %s"
+			, BUILD_DIR
+		);
+	}
+
+	return $commands;
 }
