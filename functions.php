@@ -6,23 +6,50 @@
  * GitHub branches are prefixed with 'refs/heads/' so it's
  * simple enough to just replace that and return whats left.
  *
- * @return string
+ * @return string|boolean The branch name on success, false otherwise.
  *
  * @author JayWood
  * @since  NEXT
  */
 function get_branch_pushed() {
-	if ( ! isset( $_REQUEST['payload'] ) ) {
-		return '';
+
+	$payload = get_payload();
+	if ( user_is_beanstalk() ) {
+		return $payload->branch;
+	} elseif ( user_is_github() ) {
+		return str_replace( 'refs/heads/', '', $payload->refs );
+	}
+	return false;
+}
+
+/**
+ * Grabs the payload from the deploy hook.
+ *
+ *
+ * @return mixed
+ *
+ * @author JayWood
+ * @since  NEXT
+ */
+function get_payload() {
+	static $payload;
+
+	if ( null !== $payload ) {
+		return $payload;
 	}
 
-	$payload = $_REQUEST['payload'];
-	$decoded = json_decode( $payload );
-	if ( ! $decoded || ! $decoded->refs ) {
-		return '';
+	if ( user_is_beanstalk() ) {
+		// Beanstalk has a special way of handling the payload.
+		$input = json_decode( file_get_contents( 'php://input' ) );
+		if ( isset( $input->payload ) ) {
+			$payload = $input->payload;
+		}
+	} elseif ( user_is_github() ) {
+		$input = $_REQUEST['payload'] ?: '';
+		$payload = json_decode( $input );
 	}
 
-	return str_replace( 'refs/heads/', '', $decoded->refs );
+	return $payload;
 }
 
 /**

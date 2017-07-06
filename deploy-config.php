@@ -172,7 +172,7 @@ define( 'EMAIL_ON_ERROR', 'contact@webdevstudios.com' );
 
 define( 'ENVIRONMENTS', json_encode( array(
 	'production' => array(
-		'repo' => 'git@bitbucket.org:jaywood/deploytest.git',
+		'repo' => 'git@bitbucket.org:jaywood/anotherrepo.git',
 		'remote_branch' => 'master',
 		'local_branch' => 'master',
 	),

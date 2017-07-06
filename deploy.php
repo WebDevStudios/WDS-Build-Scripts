@@ -24,6 +24,9 @@ if ( file_exists( basename( __FILE__, '.php' ) . '-config.php' ) ) {
 	define( 'CONFIG_FILE', __FILE__ );
 }
 
+// Helper functions
+require_once 'functions.php';
+
 /**
  * Protect the script from unauthorized access by using a secret access token.
  * If it's not present in the access URL as a GET variable named `sat`
@@ -271,65 +274,6 @@ Deploying <?php echo REMOTE_REPOSITORY; ?> <?php echo BRANCH . "\n"; ?>
 to        <?php echo TARGET_DIR; ?> ...
 
 <?php
-
-/**
- * Grabs the branch this was pushed to.
- *
- * GitHub branches are prefixed with 'refs/heads/' so it's
- * simple enough to just replace that and return whats left.
- *
- * @return string
- *
- * @author JayWood
- * @since  NEXT
- */
-function get_branch_pushed() {
-	if ( ! isset( $_REQUEST['payload'] ) ) {
-		return '';
-	}
-
-	$payload = $_REQUEST['payload'];
-	$decoded = json_decode( $payload );
-	if ( ! $decoded || ! $decoded->refs ) {
-		return '';
-	}
-
-	return str_replace( 'refs/heads/', '', $decoded->refs );
-}
-
-/**
- * Gets and parses a list of environments from the constant.
- *
- * @return array an array of environments.
- *
- * @author JayWood
- * @since  NEXT
- */
-function get_environments() {
-	static $environments;
-
-	if ( null !== $environments ) {
-		return $environments;
-	}
-
-	if ( ! defined( 'ENVIRONMENTS' ) || empty( ENVIRONMENTS ) ) {
-		$environments = array();
-		return $environments;
-	}
-
-	$environments = json_decode( ENVIRONMENTS, true );
-	$out = [];
-
-	foreach( $environments as $name => $env ) {
-		if ( empty( $env['remote_branch'] ) || empty( $env['repo'] ) || empty( $env['local_branch'] ) ) {
-			continue;
-		}
-		$out[ $name ] = $env;
-	}
-
-	return $out;
-}
-
 // The commands
 $commands = array();
 
@@ -433,9 +377,9 @@ if ( ! empty( get_environments() ) ) {
 
 		// Uncomment the following lines if you want to restrict deploys
 		// while listening to the specific branch.
-		// if ( get_branch_pushed() !== $env_branch ) {
-		// 	continue;
-		// }
+		if ( get_branch_pushed() !== $env_branch ) {
+			continue;
+		}
 
 		// Add all files, including VERSION ( for obvious reasons )
 		$commands[] = sprintf(
