@@ -50,7 +50,7 @@ For Jenkins, you'll notice there are two extra files, `trigger.sh` and `ftp-sync
 - Setup your normal Jenkins pre-build steps, or copy an existing setup.
 - Scroll down to 'Build' and click 'Add build step'
 - Select 'Execute Shell' twice, to add two build steps.
-- Setup your build script first from `trigger.sh`
+- Setup your build script first from `trigger.sh` - edit this file and add/remove directories you would like to build.
 
 ```
 #!/bin/bash
