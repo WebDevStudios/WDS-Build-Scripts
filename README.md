@@ -25,9 +25,11 @@ For example:
 - - build.sh
 - - deploy-config.php
 - - deploy.php
+- - ftp-sync.sh
+- - trigger.sh
 ```
 
-### Setup
+### Non-Jenkins Setup
 
 - Open `deploy-config.php` and create a secret access token (this can be anything)
 - Configure the rest `deploy-config.php` to meet your needs
@@ -40,6 +42,34 @@ When a commit is pushed to `master` (or whatever branch you configured) this wil
 #### Bonus
 
 You could also kick-off a deployment, just by visiting the same webhook URL in a web browser. Then you can watch the deployment + build happen in real time!
+
+### Jenkins Setup
+
+For Jenkins, you'll notice there are two extra files, `trigger.sh` and `ftp-sync.sh` - these were built specifically for a Jenkins setup, though you are free to use them externally should you see the need.
+
+- Setup your normal Jenkins pre-build steps, or copy an existing setup.
+- Scroll down to 'Build' and click 'Add build step'
+- Select 'Execute Shell' twice, to add two build steps.
+- Setup your build script first from `trigger.sh`
+
+```
+#!/bin/bash
+
+# Execute our script
+. "$WORKSPACE/trigger.sh"
+```
+
+- Setup the ftp sync after the build is done.
+
+```
+#!/bin/bash
+
+#Execute the FTP deploy syncing script.
+ . "$WORKSPACE/ftp-sync.sh" -u "username" -p "pass" -d "var/www/mysite" -h "127.0.0.7" --port "22" --sftp "true"
+```
+
+- Finish setting up Jenkins how you see fit.
+
 
 ### Contributing
 
