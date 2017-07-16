@@ -98,13 +98,6 @@ fi
 BASE_DIR=$(cd $(dirname "$0") && pwd)
 local_dir="$WORKSPACE"; # we consider here that the web site sources are sibling of this script
 
-echo "ftp_user: $ftp_user"
-echo "ftp_password: $ftp_password"
-echo "ftp_host: $ftp_host"
-echo "remote_dir: $remote_dir"
-echo "PORT: $PORT"
-echo "PREFIX: $PREFIX"
-
 echo "============================================="
 echo "Sending data to $ftp_user on $ftp_host via $PREFIX to $remote_dir"
 echo "Base Directory: $WORKSPACE"
