@@ -99,7 +99,14 @@ if [ -z ${PREFIX+x} ]; then
 	PREFIX="ftp"
 fi
 
-echo "============================================="
+RED='\033[00;31m'
+GREEN='\033[00;32m'
+BLUE='\033[00;34m'
+PURPLE='\033[00;35m'
+CYAN='\033[00;36m'
+CLEAR='\033[00;0m'
+
+echo -e "${GREEN}============================================="
 echo "Sending data to $ftp_user on $ftp_host via $PREFIX to $remote_dir"
 echo "Base Directory: $WORKSPACE"
 echo "============================================="
@@ -124,13 +131,6 @@ FTP_MIRROR=" mirror --ignore-time \
 	--exclude-glob composer.* \
 	--exclude-glob node_modules/ \
 	--exclude-glob *.sh;"
-
-RED='\033[00;31m'
-GREEN='\033[00;32m'
-BLUE='\033[00;34m'
-PURPLE='\033[00;35m'
-CYAN='\033[00;36m'
-CLEAR='\033[00;0m'
 
 ##
 # Remove a file from the FTP server
@@ -158,34 +158,40 @@ add_file() {
 SUBCOMMANDS=""
 REPORT=""
 
-echo -e "${CYAN}Comparing against ${GIT_PREVIOUS_SUCCESSFUL_COMMIT}"
+if [ -z ${GIT_PREVIOUS_SUCCESSFUL_COMMIT+x} ]; then
+	echo -e "${RED}No previous commit to check against, running initial sync.${CLEAR}"
+else
+	echo -e "${CYAN}Comparing against ${GIT_PREVIOUS_SUCCESSFUL_COMMIT}${CLEAR}"
+	# Loop over all changed files
+	REPORT+="${BLUE}=================================="
+	REPORT+="|         Transfer Report"
+	REPORT+="=================================="
+	while read -r line; do
+		
+		# Exclude a few basic scripts.
+		if [[ $line != *".sh"* ]] || [[ $line != *"wds-sync-script"* ]]; then
+		
+			filename="$( echo $line | awk '{ print $2; }')"
+			status="$( echo $line | awk '{ print $1; }')"
 
-# Loop over all changed files
-while read -r line; do
-	
-	# Exclude a few basic scripts.
-	if [[ $line != *".sh"* ]] || [[ $line != *"wds-sync-script"* ]]; then
-	
-		filename="$( echo $line | awk '{ print $2; }')"
-		status="$( echo $line | awk '{ print $1; }')"
+			if [[ $status == "D" ]]; then
+				# Delete this file
+				command=$(remove_file $filename)
 
-		if [[ $status == "D" ]]; then
-			# Delete this file
-			command=$(remove_file $filename)
+				## Add this to the report
+				REPORT+="${RED}[-]: ${filename} \n"
+			else
+				# Put this file
+				command=$(add_file $filename)
 
-			## Add this to the report
-			REPORT+="${RED}[-]: ${filename} \n"
-		else
-			# Put this file
-			command=$(add_file $filename)
+				## Add this to the report
+				REPORT+="${GREEN}[+]: ${filename} \n"
+			fi
 
-			## Add this to the report
-			REPORT+="${GREEN}[+]: ${filename} \n"
+			SUBCOMMANDS+=" ${command}"
 		fi
-
-		SUBCOMMANDS+=" ${command}"
-	fi
-done < <(git diff --name-status $GIT_PREVIOUS_SUCCESSFUL_COMMIT HEAD)
+	done < <(git diff --name-status $GIT_PREVIOUS_SUCCESSFUL_COMMIT HEAD)
+fi
 
 # Walk over any 'guarnateed' uploads.
 if [[ -n "${FORCE_UPLOADS+set}" ]]; then
@@ -206,12 +212,11 @@ fi
 echo "${FTP_CONNECT} ${SUBCOMMANDS} ${FTP_MIRROR}" > "${WORKSPACE}/wds-sync-script"
 
 # Connect and run the created commands file ( as outlined in the above line )
+echo -e "${CYAN}"
 lftp -f "${WORKSPACE}/wds-sync-script"
+echo -e "${CLEAR}"
 
 # All done, print the transfer report.
-echo -e "${BLUE}=================================="
-echo "|         Transfer Report"
-echo "=================================="
 echo -e "${REPORT} ${CLEAR}"
 
 # Remove the commands file used for FTP
