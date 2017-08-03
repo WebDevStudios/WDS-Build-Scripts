@@ -45,30 +45,41 @@ You could also kick-off a deployment, just by visiting the same webhook URL in a
 
 ### Jenkins Setup
 
-For Jenkins, you'll notice there are two extra files, `trigger.sh` and `ftp-sync.sh` - these were built specifically for a Jenkins setup, though you are free to use them externally should you see the need.
+For Jenkins, you'll notice there are three extra files.
+* jenkins-compile.sh
+* jenkins-config.sh
+* jenkins-ftp-sync.sh
 
-- Setup your normal Jenkins pre-build steps, or copy an existing setup.
-- Scroll down to 'Build' and click 'Add build step'
-- Select 'Execute Shell' twice, to add two build steps.
-- Setup your build script first from `trigger.sh` - edit this file and add/remove directories you would like to build.
+All jenkins files will need to be present in the root of your repository. Do not add these files to your `.gitignore`. These were built specifically for a Jenkins setup, though you are free to use them externally should you see the need.
 
+#### Build setup ( Jenkins )
+* Add a build-step, set it to `Execute Shell`
+* First call the `jenkins-compile.sh` - no parameters needed.
 ```
 #!/bin/bash
 
-# Execute our script
-. "$WORKSPACE/trigger.sh"
+. "$WORKSPACE/jenkins-compile.sh"
 ```
-
-- Setup the ftp sync after the build is done.
+* Add another build step for the FTP sync
 
 ```
 #!/bin/bash
 
 #Execute the FTP deploy syncing script.
- . "$WORKSPACE/ftp-sync.sh" -u "username" -p "pass" -d "var/www/mysite" -h "127.0.0.7" --port "22" --sftp "true"
+ . "$WORKSPACE/ftp-sync.sh" -u "ftp-username" -p "ftp-password" -h "ftp-domain.com" -d "wp-content" --port "2222" -s "true"
 ```
 
-- Finish setting up Jenkins how you see fit.
+* Finish setting up Jenkins how you see fit.
+
+#### FTP Flags
+```
+	-u [--username]     The username for the FTP host.
+	-p [--password]     The password for the FTP host.
+	-h [--host]         The IP address for the remote FTP host.
+	-d [--directory]    Where you will be pushing the files to.
+	-s [--sftp]         Set to enable SFTP
+	-p [--port]         The port to use for FTP.
+```
 
 
 ### Contributing
