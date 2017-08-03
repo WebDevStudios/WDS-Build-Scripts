@@ -20,7 +20,7 @@ the script is ran within.
 	-h [--host]         The IP address for the remote FTP host.
 	-d [--directory]    Where you will be pushing the files to.
 	-s [--sftp]         Set to enable SFTP
-	-p [--port]         The port to use for FTP.
+	--port              The port to use for FTP.
 
 EOF
 }
