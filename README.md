@@ -73,12 +73,12 @@ All jenkins files will need to be present in the root of your repository. Do not
 
 #### FTP Flags
 ```
-	-u [--username]     The username for the FTP host.
-	-p [--password]     The password for the FTP host.
-	-h [--host]         The IP address for the remote FTP host.
-	-d [--directory]    Where you will be pushing the files to.
-	-s [--sftp]         Set to enable SFTP
-	-p [--port]         The port to use for FTP.
+ -u [--username]     The username for the FTP host.
+ -p [--password]     The password for the FTP host.
+ -h [--host]         The IP address for the remote FTP host.
+ -d [--directory]    Where you will be pushing the files to.
+ -s [--sftp]         Set to enable SFTP
+ --port              The port to use for FTP.
 ```
 
 
