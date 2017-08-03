@@ -163,9 +163,9 @@ if [ -z ${GIT_PREVIOUS_SUCCESSFUL_COMMIT+x} ]; then
 else
 	echo -e "${CYAN}Comparing against ${GIT_PREVIOUS_SUCCESSFUL_COMMIT}${CLEAR}"
 	# Loop over all changed files
-	REPORT+="${BLUE}=================================="
-	REPORT+="|         Transfer Report"
-	REPORT+="=================================="
+	REPORT+="${BLUE}==================================\n"
+	REPORT+="|         Transfer Report\n"
+	REPORT+="==================================\n"
 	while read -r line; do
 		
 		# Exclude a few basic scripts.
