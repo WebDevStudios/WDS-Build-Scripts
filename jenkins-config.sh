@@ -15,6 +15,11 @@ BUILD_FILES=(
 FORCE_UPLOADS=(
 	"themes/yourthemename/style.css"
 	"themes/yourthemename/style.min.css"
+	"themes/yourthemename/assets/scripts/project.js"
+	"themes/yourthemename/assets/scripts/project.min.js"
+	"themes/yourthemename/assets/images/svg-icons.svg"
+	"themes/yourthemename/assets/images/sprites.png"
+	"themes/yourthemename/languages/yourthemename.pot"
 )
 
 ## STOP EDITING HERE
