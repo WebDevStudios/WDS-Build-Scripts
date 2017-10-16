@@ -28,7 +28,7 @@ define( 'SECRET_ACCESS_TOKEN', 'project-client-name' );
  *
  * @var string
  */
-define( 'REMOTE_REPOSITORY', 'git@github.com:WebDevStudios/project-client-name.git' );
+define( 'REMOTE_REPOSITORY', '' );
 
 /**
  * The branch that's being deployed.
@@ -36,7 +36,7 @@ define( 'REMOTE_REPOSITORY', 'git@github.com:WebDevStudios/project-client-name.g
  *
  * @var string
  */
-define( 'BRANCH', 'master' );
+define( 'LAB_BRANCH', 'master' );
 
 /**
  * The location that the code is going to be deployed to.
@@ -46,7 +46,7 @@ define( 'BRANCH', 'master' );
  *
  * @var string Full path including the trailing slash
  */
-define( 'TARGET_DIR', '/srv/users/username/apps/appname/public/wp-content/' );
+define( 'TARGET_DIR', '/home/jay/html/dd2' );
 
 /**
  * Whether to delete the files that are not in the repository but are on the
@@ -72,6 +72,7 @@ define( 'DELETE_FILES', false );
 define('EXCLUDE', serialize( array(
 	'.git',
 	'node_modules',
+	'deploy',
 )));
 
 /**
@@ -157,7 +158,8 @@ define( 'BUILD_APP', true );
 /**
  * The locations of the theme for building.
  */
-define( 'BUILD_DIR', 'themes/client-theme' );
+// define( 'BUILD_DIR', 'themes/client-theme' );
+define( 'BUILD_DIR', TMP_DIR .'themes/loveisrespect' ); // Use tmp dir, so we can build there.
 
 /**
  * OPTIONAL
@@ -167,3 +169,11 @@ define( 'BUILD_DIR', 'themes/client-theme' );
  *      e.g. 'someone@example.com' or 'someone@example.com, someone-else@example.com, ...'
  */
 define( 'EMAIL_ON_ERROR', 'contact@webdevstudios.com' );
+
+define( 'ENVIRONMENTS', json_encode( array(
+	'production' => array(
+		'repo' => 'git@bitbucket.org:jaywood/anotherrepo.git', // WP Engine repo/production
+		'remote_branch' => 'master',
+		'listen_branch' => 'deploy-tests', // Beanstalk repo
+	),
+) ) );
